@@ -1,4 +1,4 @@
-package com.example.AllChat.service;
+package com.example.AllChat.model;
 
 import lombok.Getter;
 import lombok.Setter;
