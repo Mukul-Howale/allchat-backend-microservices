@@ -1,10 +1,11 @@
-package com.example.AllChat.model;
+package com.example.AllChat.dto;
 
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
-public class LeaveChatRequest {
+public class JoinChatRequest {
     private String userId;
+    private int groupSize;
 }

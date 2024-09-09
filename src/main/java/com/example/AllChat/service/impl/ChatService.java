@@ -1,7 +1,9 @@
-package com.example.AllChat.service;
+package com.example.AllChat.service.impl;
 
 import com.example.AllChat.handler.ChatWebSocketHandler;
 import com.example.AllChat.model.ChatSession;
+import com.example.AllChat.service.WebSocketMessageSender;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -19,8 +21,11 @@ public class ChatService {
     private final Map<Integer, Queue<String>> waitingUsers = new ConcurrentHashMap<>();
     private final Map<String, ChatSession> activeSessions = new ConcurrentHashMap<>();
 
-    @Autowired
-    private ChatWebSocketHandler webSocketHandler;
+    private final WebSocketMessageSender messageSender;
+
+    public ChatService(WebSocketMessageSender messageSender) {
+        this.messageSender = messageSender;
+    }
 
     public String joinChatQueue(String userId, int groupSize) {
         Queue<String> queue = waitingUsers.computeIfAbsent(groupSize, k -> new ConcurrentLinkedQueue<>());
@@ -53,7 +58,7 @@ public class ChatService {
                     .filter(participantId -> !participantId.equals(userId))
                     .forEach(participantId -> {
                         try {
-                            webSocketHandler.sendMessage(participantId, message);
+                            messageSender.sendMessage(participantId, message);
                         } catch (IOException e) {
                             // Handle exception
                         }
@@ -76,7 +81,7 @@ public class ChatService {
         String message = String.format("{\"type\":\"match\",\"sessionId\":\"%s\"}", sessionId);
         participants.forEach(userId -> {
             try {
-                webSocketHandler.sendMessage(userId, message);
+                messageSender.sendMessage(userId, message);
             } catch (IOException e) {
                 // Handle exception
             }
@@ -89,7 +94,7 @@ public class ChatService {
                 .filter(userId -> !userId.equals(leftUserId))
                 .forEach(userId -> {
                     try {
-                        webSocketHandler.sendMessage(userId, message);
+                        messageSender.sendMessage(userId, message);
                     } catch (IOException e) {
                         // Handle exception
                     }
