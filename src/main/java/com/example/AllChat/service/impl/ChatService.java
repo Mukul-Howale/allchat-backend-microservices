@@ -1,10 +1,8 @@
 package com.example.AllChat.service.impl;
 
-import com.example.AllChat.handler.ChatWebSocketHandler;
 import com.example.AllChat.model.ChatSession;
 import com.example.AllChat.service.WebSocketMessageSender;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
