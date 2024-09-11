@@ -26,6 +26,15 @@ public class ChatService {
     }
 
     public String joinChatQueue(String userId, int groupSize) {
+        /*
+            1. Check if the activeSessions with same groupSize of the user
+                a. If present, check if the group has empty space for the user
+                b. If present, join the chat
+                c. If not move to the next group
+             2. If no activeSession with same groupSize, create new session
+        */
+
+        //Should be multiple waiting queues for faster response
         Queue<String> queue = waitingUsers.computeIfAbsent(groupSize, k -> new ConcurrentLinkedQueue<>());
         queue.offer(userId);
 

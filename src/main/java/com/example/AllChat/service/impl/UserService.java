@@ -10,7 +10,7 @@ public class UserService {
     }
 
     public boolean existsByEmail(String email) {
-        return true
+        return true;
     }
 
     public void save(User user) {

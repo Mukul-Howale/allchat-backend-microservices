@@ -24,8 +24,7 @@ public class ChatController {
         if (token != null && token.startsWith("Bearer ")) {
             token = token.substring(7);
             if (jwtUtil.validateToken(token)) {
-                String username = jwtUtil.getUsernameFromToken(token);
-                String sessionId = chatService.joinChatQueue(username, request.getGroupSize());
+                String sessionId = chatService.joinChatQueue(jwtUtil.getUsernameFromToken(token), request.getGroupSize());
                 return ResponseEntity.ok(sessionId);
             }
         }
