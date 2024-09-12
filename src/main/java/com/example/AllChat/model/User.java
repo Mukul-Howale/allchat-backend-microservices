@@ -1,13 +1,13 @@
 package com.example.AllChat.model;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 @Entity
 @Table(name = "users")
 @Getter
 @Setter
+@NoArgsConstructor
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -17,9 +17,6 @@ public class User {
     private String username;
     private String email;
     private String password;
-
-    // Default constructor
-    public User() {}
 
     // Constructor with fields
     public User(String name, String username, String email, String password) {
