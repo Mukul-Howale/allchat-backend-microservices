@@ -21,4 +21,13 @@ public class Profile {
     private Long thumbsDown;
     private Boolean isPaidUser;
     private Boolean isEmailVerified;
+
+    public Profile(Long phoneNumber, Long friendsCount, Long thumbsUp, Long thumbsDown, Boolean isPaidUser, Boolean isEmailVerified) {
+        this.phoneNumber = phoneNumber;
+        this.friendsCount = friendsCount;
+        this.thumbsUp = thumbsUp;
+        this.thumbsDown = thumbsDown;
+        this.isPaidUser = isPaidUser;
+        this.isEmailVerified = isEmailVerified;
+    }
 }
