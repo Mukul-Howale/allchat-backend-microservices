@@ -22,6 +22,9 @@ public class Profile {
     private Boolean isPaidUser;
     private Boolean isEmailVerified;
 
+    @OneToOne(mappedBy = "users")
+    private User user;
+
     public Profile(Long phoneNumber, Long friendsCount, Long thumbsUp, Long thumbsDown, Boolean isPaidUser, Boolean isEmailVerified) {
         this.phoneNumber = phoneNumber;
         this.friendsCount = friendsCount;

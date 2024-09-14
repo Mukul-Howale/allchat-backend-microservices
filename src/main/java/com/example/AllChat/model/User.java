@@ -18,6 +18,10 @@ public class User {
     private String email;
     private String password;
 
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "profiles_id", referencedColumnName = "id")
+    private Profile profile;
+
     // Constructor with fields
     public User(String name, String username, String email, String password) {
         this.name = name;
