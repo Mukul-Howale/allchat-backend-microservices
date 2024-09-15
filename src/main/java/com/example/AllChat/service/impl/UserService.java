@@ -1,20 +1,27 @@
 package com.example.AllChat.service.impl;
 
-import com.example.AllChat.dto.AuthResponse;
 import com.example.AllChat.dto.LoginRequest;
 import com.example.AllChat.dto.SignupRequest;
 import com.example.AllChat.model.User;
+import com.example.AllChat.repository.UserRepository;
 import com.example.AllChat.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
 public class UserService {
     @Autowired
     private JwtUtil jwtUtil;
-    private static boolean existsByUsername(String username) {
-        return true;
+
+    @Autowired
+    private UserRepository userRepository;
+
+    private boolean existsByUsername(String username) {
+        Optional<User> user = userRepository.existsByUsername(username);
+        return user.isPresent();
     }
 
     private static boolean existsByEmail(String email) {
@@ -28,7 +35,7 @@ public class UserService {
         return new User();
     }
 
-    public ResponseEntity<Object> signup(SignupRequest signupRequest) {
+    public ResponseEntity<?> signup(SignupRequest signupRequest) {
         if (existsByUsername(signupRequest.getUsername())) return ResponseEntity.badRequest().body("Username is already taken");
         if (existsByEmail(signupRequest.getEmail())) return ResponseEntity.badRequest().body("Email is already in use");
         User user = new User(signupRequest.getName(), signupRequest.getUsername(),signupRequest.getEmail(), signupRequest.getPassword());
@@ -37,7 +44,7 @@ public class UserService {
         return ResponseEntity.ok(token);
     }
 
-    public ResponseEntity<Object> login(LoginRequest loginRequest){
+    public ResponseEntity<?> login(LoginRequest loginRequest){
         User user = findByEmail(loginRequest.getEmail());
         if (user == null || !user.getPassword().equals(loginRequest.getPassword())) return ResponseEntity.badRequest().body("Invalid email or password");
         String token = jwtUtil.generateToken(user.getUsername());
