@@ -14,4 +14,9 @@ public interface UserRepository extends JpaRepository<User, Long> {
             nativeQuery = true,
             value = "SELECT * FROM allchat.`user` u WHERE u.username = :username")
     Optional<User> existsByUsername(@Param("email") String username);
+
+    @Query(
+            nativeQuery = true,
+            value = "SELECT * FROM allchat.`user` u WHERE u.email = :email")
+    Optional<User> existsByEmail(@Param("email") String email);
 }
