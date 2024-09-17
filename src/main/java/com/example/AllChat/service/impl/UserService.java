@@ -29,7 +29,8 @@ public class UserService {
         return user.isPresent();
     }
 
-    private static void save(User user) {
+    private void save(User user) {
+        userRepository.save(user);
     }
 
     private User findByEmail(String email) {
