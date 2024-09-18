@@ -52,4 +52,8 @@ public class UserService {
         String token = jwtUtil.generateToken(user.getUsername());
         return ResponseEntity.ok(token);
     }
+
+    public ResponseEntity<?> getProfile(String userId){
+        return ResponseEntity.ok("ok");
+    }
 }
