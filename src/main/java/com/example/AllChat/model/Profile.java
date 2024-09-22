@@ -22,7 +22,7 @@ public class Profile {
     private Boolean isPaidUser;
     private Boolean isEmailVerified;
 
-    @OneToOne(mappedBy = "users")
+    @OneToOne(fetch = FetchType.LAZY)
     private User user;
 
     public Profile(Long phoneNumber, Long friendsCount, Long thumbsUp, Long thumbsDown, Boolean isPaidUser, Boolean isEmailVerified) {
