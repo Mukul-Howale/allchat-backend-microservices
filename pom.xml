@@ -11,6 +11,7 @@
 	<groupId>com.example</groupId>
 	<artifactId>AllChat</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
+	<packaging>pom</packaging>
 	<name>AllChat</name>
 	<description>Demo project for Spring Boot</description>
 	<modules>
