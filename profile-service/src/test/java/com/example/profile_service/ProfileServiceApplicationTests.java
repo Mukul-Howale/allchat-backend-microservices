@@ -1,10 +1,10 @@
-package com.example.AllChat;
+package com.example.profile_service;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class AllChatApplicationTests {
+class ProfileServiceApplicationTests {
 
 	@Test
 	void contextLoads() {
