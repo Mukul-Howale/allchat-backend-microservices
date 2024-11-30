@@ -18,7 +18,7 @@ public class Profile {
     private BigInteger friends;
     private BigInteger likes;
     private BigInteger dislikes;
-    private boolean paid;
+    //private boolean paid;
     private String profilePictureURL;
 
     private String userId;
