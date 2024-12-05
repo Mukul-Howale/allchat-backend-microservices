@@ -16,6 +16,7 @@
 	<description>Demo project for Spring Boot</description>
 	<modules>
 		<module>profile-service</module>
+		<module>user-service</module>
 	</modules>
 
 	<properties>
