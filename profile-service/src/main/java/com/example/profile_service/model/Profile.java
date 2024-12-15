@@ -14,6 +14,7 @@ import java.math.BigInteger;
 @NoArgsConstructor
 @Builder
 public class Profile {
+
     private String id;
     private BigInteger friends;
     private BigInteger likes;

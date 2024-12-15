@@ -1,6 +1,7 @@
 package com.example.profile_service.controller;
 
 import com.example.profile_service.dto.ProfileResponseDto;
+import com.example.profile_service.service.IProfileService;
 import com.example.profile_service.service.impl.ProfileService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -12,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class ProfileController {
 
-    private final ProfileService profileService;
+    private final IProfileService profileService;
 
     @PostMapping("/create-profile")
     public ResponseEntity<ProfileResponseDto> createProfile(String userId) throws Exception {
