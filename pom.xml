@@ -17,6 +17,7 @@
 	<modules>
 		<module>profile-service</module>
 		<module>user-service</module>
+		<module>service-registry</module>
 	</modules>
 
 	<properties>
