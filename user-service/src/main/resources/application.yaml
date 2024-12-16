@@ -1,6 +1,13 @@
 spring:
   application:
     name: user-service
+  config:
+    import: file:user-service/src/main/resources/secrets.properties
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5432/allchat
+    username: ${POSTGRES_USERNAME}
+    password: ${POSTGRES_PASSWORD}
 
 server:
   port: 8081

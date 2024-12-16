@@ -1,6 +1,11 @@
 spring:
   application:
     name: profile-service
+  data:
+    mongodb:
+      host: localhost
+      port: 27017
+      database: dev_allchat
 
 server:
   port: 8082
