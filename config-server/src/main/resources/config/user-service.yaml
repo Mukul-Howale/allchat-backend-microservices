@@ -16,3 +16,10 @@ eureka:
   client:
     service-url:
       defaultZone: http://localhost:8761/eureka/
+
+# This helps in publishing 100% of matrices to zipkin
+# probability : 1.0
+management:
+  tracing:
+    sampling:
+      probability: 1.0
