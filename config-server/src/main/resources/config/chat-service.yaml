@@ -7,8 +7,13 @@ spring:
     username: postgres
     password: allchat@12345
 
+# Was searching for a bug for past 30 mins
+# tomcat was running on 8080 even after assigning
+# 8093 as a server port
+# the bug was I had written post instead of port
+# really need to get new glasses
 server:
-  post: 8083
+  port: 8093
 
 eureka:
   client:

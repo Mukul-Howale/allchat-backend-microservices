@@ -6,7 +6,7 @@ spring:
       database: dev_allchat
 
 server:
-  port: 8082
+  port: 8092
 
 eureka:
   client:

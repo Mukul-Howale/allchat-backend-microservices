@@ -10,7 +10,10 @@ zipkin
 http://localhost:9411/zipkin/
 
 user-service
-http://localhost:8081
+http://localhost:8091
 
 profile-service
-http://localhost:8082
+http://localhost:8092
+
+chat-service
+http://localhost:8093
