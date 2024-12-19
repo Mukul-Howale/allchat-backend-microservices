@@ -1,0 +1,21 @@
+spring:
+  config:
+    import: file:config-server/src/main/resources/config/secrets.properties
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5432/allchat
+    username: postgres
+    password: allchat@12345
+
+server:
+  post: 8083
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+
+management:
+  tracing:
+    sampling:
+      probability: 1.0
