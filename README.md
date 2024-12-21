@@ -1,5 +1,7 @@
 # AllChat-Backend
 
+Backend microservice architecture for allchat application
+
 config-server
 http://localhost:8088
 
