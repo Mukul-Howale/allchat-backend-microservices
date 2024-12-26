@@ -6,10 +6,20 @@ import org.springframework.stereotype.Service;
 public class ChatService {
 
     public boolean startChat(){
-        return true;
+        try{
+            return true;
+        }
+        catch(Exception e){
+            return false;
+        }
     }
 
     public boolean stopChat(){
-        return true;
+        try{
+            return true;
+        }
+        catch(Exception e){
+            return false;
+        }
     }
 }

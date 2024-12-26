@@ -2,6 +2,7 @@ package com.allchat.chat_service.controller;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -17,13 +18,15 @@ public class ChatController {
         this.chatService = chatService;
     }
 
-    @RequestMapping("/start")
-    public ResponseEntity<Boolean> startChat() throws Exception {
-        return new ResponseEntity<>(chatService.startChat(), HttpStatus.OK);
+    @GetMapping("/start")
+    public ResponseEntity<String> startChat() throws Exception {
+        boolean result = chatService.startChat();
+        return result ? new ResponseEntity<>("Chat started", HttpStatus.OK) : new ResponseEntity<>("Unable to start chat", HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-    @RequestMapping("/stop")
-    public ResponseEntity<Boolean> stopChat() throws Exception {
-        return new ResponseEntity<>(chatService.stopChat(), HttpStatus.OK);
+    @GetMapping("/stop")
+    public ResponseEntity<String> stopChat() throws Exception {
+        boolean result = chatService.stopChat();
+        return result ? new ResponseEntity<>("Chat stopped", HttpStatus.OK) : new ResponseEntity<>("Unable to stop chat", HttpStatus. INTERNAL_SERVER_ERROR);
     }
 }
