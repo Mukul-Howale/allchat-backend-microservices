@@ -27,6 +27,7 @@ public class ChatWebSocketHandler implements WebSocketHandler {
 
     @Override
     public void handleMessage(@NonNull WebSocketSession session, @NonNull WebSocketMessage<?> message) throws Exception {
+        
         log.info("handleMessage");
     }
 

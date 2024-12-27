@@ -1,5 +1,7 @@
 package com.allchat.chat_service.controller;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,6 +15,8 @@ import com.allchat.chat_service.service.ChatService;
 public class ChatController {
 
     private final ChatService chatService;
+
+    private static final Logger log = LoggerFactory.getLogger(ChatController.class);
 
     public ChatController(ChatService chatService) {
         this.chatService = chatService;
