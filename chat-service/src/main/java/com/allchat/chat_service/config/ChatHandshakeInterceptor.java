@@ -18,14 +18,12 @@ public class ChatHandshakeInterceptor implements HandshakeInterceptor {
     @Override
     public boolean beforeHandshake(ServerHttpRequest request, ServerHttpResponse response, WebSocketHandler wsHandler, Map<String, Object> attributes) throws Exception {
         String authToken = request.getHeaders().getFirst("authToken");
-        System.out.println("Before handshake");
         log.info("Before handshake");
-        return false;
+        return true;
     }
 
     @Override
     public void afterHandshake(ServerHttpRequest request, ServerHttpResponse response, WebSocketHandler wsHandler, Exception exception) {
         log.info("After handshake");
-        System.out.println("After handshake");
     }
 }
