@@ -2,6 +2,7 @@ package com.allchat.chat_service.config;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.actuate.web.exchanges.HttpExchange.Session;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.WebSocketHandler;
@@ -37,6 +38,7 @@ public class ChatWebSocketHandler implements WebSocketHandler {
 
     @Override
     public void afterConnectionClosed(@NonNull WebSocketSession session, @NonNull CloseStatus closeStatus) throws Exception {
+        sessions.remove(session.getId());
         log.info("afterConnectionClosed");
     }
 

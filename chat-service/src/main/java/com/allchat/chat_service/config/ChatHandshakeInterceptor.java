@@ -17,7 +17,16 @@ public class ChatHandshakeInterceptor implements HandshakeInterceptor {
 
     @Override
     public boolean beforeHandshake(ServerHttpRequest request, ServerHttpResponse response, WebSocketHandler wsHandler, Map<String, Object> attributes) throws Exception {
-        String authToken = request.getHeaders().getFirst("authToken");
+        // @Feature
+        // private and public
+        // public use will have features like profile, filters, etc (requires authentication)
+        // private use will not have features, (no authentication required)
+
+        // Get token from request
+        // validate token
+        // return true if token is valid
+        // return false if token is invalid
+
         log.info("Before handshake");
         return true;
     }
