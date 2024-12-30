@@ -6,5 +6,4 @@ import com.allchat.user_service.dto.UserResponseDto;
 
 public interface IUserService {
 
-    UserResponseDto signUp(UserRequestDto userRequestDto);
 }

@@ -19,7 +19,7 @@ public class ChatHandshakeInterceptor implements HandshakeInterceptor {
     public boolean beforeHandshake(ServerHttpRequest request, ServerHttpResponse response, WebSocketHandler wsHandler, Map<String, Object> attributes) throws Exception {
         // @Feature
         // private and public
-        // public use will have features like profile, filters, etc (requires authentication)
+        // public use will have features like profile, filters, friends, DM's, etc (requires authentication)
         // private use will not have features, (no authentication required)
 
         // Get token from request

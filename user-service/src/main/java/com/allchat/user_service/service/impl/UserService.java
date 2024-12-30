@@ -15,10 +15,4 @@ public class UserService implements IUserService {
 
     private final UserRepository userRepository;
 
-    // Dummy Created
-    // Yet to write login for signup
-    @Override
-    public UserResponseDto signUp(UserRequestDto userRequestDto) {
-        return new UserResponseDto();
-    }
 }

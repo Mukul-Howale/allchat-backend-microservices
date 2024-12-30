@@ -17,12 +17,4 @@ public class UserController {
 
     private final IUserService userService;
 
-    @PostMapping("/sign-up")
-    public ResponseEntity<UserResponseDto> singUp(@RequestBody UserRequestDto userRequestDto){
-        UserResponseDto userResponseDto = userService.signUp(userRequestDto);
-        return new ResponseEntity<>(userResponseDto, HttpStatus.CREATED);
-    }
-
-    // log-in
-    // log-out
 }

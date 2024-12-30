@@ -2,20 +2,26 @@ package com.allchat.chat_service.config;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.actuate.web.exchanges.HttpExchange.Session;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
-import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.WebSocketMessage;
 import org.springframework.web.socket.WebSocketSession;
+import org.springframework.web.socket.handler.TextWebSocketHandler;
 
 import io.micrometer.common.lang.NonNull;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+    Why use TextWebSocketHandler instead of WebSocketHandler ?
+    The WebSocketHandler interface is the base interface for WebSocket handlers.
+    The TextWebSocketHandler class extends the AbstractWebSocketHandler
+    which implements the WebSocketHandler interface and provides additional methods for handling text messages.
+ */
+
 @Component
-public class ChatWebSocketHandler implements WebSocketHandler {
+public class ChatWebSocketHandler extends TextWebSocketHandler {
 
     private static final Logger log = LoggerFactory.getLogger(ChatWebSocketHandler.class);
     private final Map<String , WebSocketSession> sessions = new ConcurrentHashMap<>();
@@ -28,23 +34,14 @@ public class ChatWebSocketHandler implements WebSocketHandler {
 
     @Override
     public void handleMessage(@NonNull WebSocketSession session, @NonNull WebSocketMessage<?> message) throws Exception {
+        // check for messages like offer or answer
+        // based on that send the message to the other peer
         log.info("handleMessage");
-    }
-
-    @Override
-    public void handleTransportError(@NonNull WebSocketSession session, @NonNull Throwable exception) throws Exception {
-        log.info("handleTransportError");
     }
 
     @Override
     public void afterConnectionClosed(@NonNull WebSocketSession session, @NonNull CloseStatus closeStatus) throws Exception {
         sessions.remove(session.getId());
         log.info("afterConnectionClosed");
-    }
-
-    @Override
-    public boolean supportsPartialMessages() {
-        log.info("supportsPartialMessages");
-        return false;
     }
 }
