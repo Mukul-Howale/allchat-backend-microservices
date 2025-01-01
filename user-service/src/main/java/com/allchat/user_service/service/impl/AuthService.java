@@ -8,8 +8,11 @@ public class AuthService implements IAuthService {
 
     // Dummy Created
     // Yet to write login for signup
-    @Override
     public AuthResponseDto signUp(AuthRequestDto authRequestDto) {
+        return new AuthResponseDto();
+    }
+
+    public AuthResponseDto signIn(String email, String password){
         return new AuthResponseDto();
     }
 }

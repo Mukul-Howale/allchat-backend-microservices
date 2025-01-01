@@ -6,4 +6,6 @@ import com.allchat.user_service.dto.AuthResponseDto;
 public interface IAuthService {
 
     AuthResponseDto signUp(AuthRequestDto authRequestDto);
+
+    AuthResponseDto signIn(String email, String password);
 }

@@ -29,6 +29,7 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
     @Override
     public void afterConnectionEstablished(@NonNull WebSocketSession session) throws Exception {
         sessions.put(session.getId(), session);
+        log.info(session.getId());
         log.info("afterConnectionEstablished");
     }
 
