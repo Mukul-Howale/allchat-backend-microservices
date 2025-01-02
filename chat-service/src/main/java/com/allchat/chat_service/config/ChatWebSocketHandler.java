@@ -29,6 +29,7 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
     @Override
     public void afterConnectionEstablished(@NonNull WebSocketSession session) throws Exception {
         sessions.put(session.getId(), session);
+
         log.info(session.getId());
         log.info("afterConnectionEstablished");
     }
@@ -37,6 +38,8 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
     public void handleMessage(@NonNull WebSocketSession session, @NonNull WebSocketMessage<?> message) throws Exception {
         // check for messages like offer or answer
         // based on that send the message to the other peer
+        // check if the message is an offer or an answer
+        // based on the message send the message to the other peer
         log.info("handleMessage");
     }
 

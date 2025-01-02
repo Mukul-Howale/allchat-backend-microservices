@@ -35,7 +35,6 @@ public class AuthController {
         AuthResponseDto authResponseDto = authService.signIn(email, password);
         return new ResponseEntity<>(authResponseDto, HttpStatus.OK);
     }
-
     // log-in
     // log-out
 
