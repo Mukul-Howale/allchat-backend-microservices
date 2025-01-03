@@ -14,6 +14,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.micrometer.common.lang.NonNull;
 
+import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -30,59 +31,41 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
     private static final Logger log = LoggerFactory.getLogger(ChatWebSocketHandler.class);
     private final Map<String , WebSocketSession> sessions = new ConcurrentHashMap<>();
     private final Map<String, Boolean> activeUsers = new ConcurrentHashMap<>(); // Track active users
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
     public void afterConnectionEstablished(@NonNull WebSocketSession session) throws Exception {
         String userId = extractUserId(session);
         sessions.put(userId, session);
-        
+        log.info("User connected: {}", userId);
+
         // Send existing active users to the new user
         for (Map.Entry<String, Boolean> entry : activeUsers.entrySet()) {
             if (entry.getValue() && !entry.getKey().equals(userId)) {
-                String message = new ObjectMapper().writeValueAsString(Map.of(
-                    "type", "userJoined",
-                    "userId", entry.getKey()
-                ));
-                session.sendMessage(new TextMessage(message));
+                notifyUserJoined(session, entry.getKey());
             }
         }
-        
-        log.info("User connected: {}", userId);
     }
 
     @Override
     public void handleMessage(@NonNull WebSocketSession session, @NonNull WebSocketMessage<?> message) throws Exception {
-        String payload = (String) message.getPayload();
-        ObjectMapper mapper = new ObjectMapper();
-        JsonNode jsonNode = mapper.readTree(payload);
-        
-        String type = jsonNode.get("type").asText();
         String userId = extractUserId(session);
-        
-        log.info("Received message type: {} from: {}", type, userId);
+        JsonNode jsonNode = objectMapper.readTree(message.getPayload().toString());
+        String type = jsonNode.get("type").asText();
+
+        log.info("Received message type: {} from user: {}", type, userId);
 
         switch (type) {
             case "ready":
-                // When user is ready to chat, mark them as active and broadcast to others
-                activeUsers.put(userId, true);
-                broadcastUserJoined(userId);
+                handleReadyMessage(userId);
                 break;
             case "offer":
             case "answer":
             case "ice-candidate":
-                String to = jsonNode.get("to").asText();
-                if (sessions.containsKey(to)) {
-                    sessions.get(to).sendMessage(message);
-                }
+                forwardWebRTCMessage(message.getPayload().toString(), jsonNode);
                 break;
             case "chat":
-                // Broadcast chat messages to all active users
-                for (Map.Entry<String, WebSocketSession> entry : sessions.entrySet()) {
-                    if (activeUsers.get(entry.getKey()) && entry.getValue().isOpen() 
-                        && !userId.equals(entry.getKey())) {
-                        entry.getValue().sendMessage(message);
-                    }
-                }
+                broadcastChatMessage(message.getPayload().toString(), userId);
                 break;
         }
     }
@@ -92,9 +75,29 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
         String userId = extractUserId(session);
         sessions.remove(userId);
         activeUsers.remove(userId);
-        
-        broadcastUserLeft(userId);
+
+        // Notify others that user has left
+        String message = objectMapper.writeValueAsString(Map.of(
+            "type", "userLeft",
+            "userId", userId
+        ));
+
+        for (WebSocketSession otherSession : sessions.values()) {
+            if (otherSession.isOpen()) {
+                otherSession.sendMessage(new TextMessage(message));
+            }
+        }
+
         log.info("User disconnected: {}", userId);
+    }
+
+    @Override
+    public void handleTransportError(WebSocketSession session, Throwable exception) throws Exception {
+        String userId = extractUserId(session);
+        log.error("Transport error for user {}: {}", userId, exception.getMessage());
+        // Clean up the user's session
+        sessions.remove(userId);
+        activeUsers.remove(userId);
     }
 
     private String extractUserId(WebSocketSession session){
@@ -124,6 +127,52 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
         for (WebSocketSession session : sessions.values()) {
             if (session.isOpen()) {
                 session.sendMessage(new TextMessage(message));
+            }
+        }
+    }
+
+    private void handleReadyMessage(String userId) throws IOException {
+        // Mark user as active
+        activeUsers.put(userId, true);
+        log.info("User ready: {}", userId);
+
+        // Notify all other users about this user
+        for (WebSocketSession session : sessions.values()) {
+            String otherUserId = extractUserId(session);
+            if (!otherUserId.equals(userId)) {
+                notifyUserJoined(session, userId);
+            }
+        }
+    }
+
+    private void forwardWebRTCMessage(String payload, JsonNode message) throws IOException {
+        String to = message.get("to").asText();
+        String from = message.get("from").asText();
+        String type = message.get("type").asText();
+
+        WebSocketSession recipientSession = sessions.get(to);
+        if (recipientSession != null && recipientSession.isOpen()) {
+            log.info("Forwarding {} signal from {} to {}", type, from, to);
+            recipientSession.sendMessage(new TextMessage(payload));
+        } else {
+            log.warn("Cannot forward {} signal to user {}: user not found or session closed", type, to);
+        }
+    }
+
+    private void notifyUserJoined(WebSocketSession session, String joinedUserId) throws IOException {
+        String message = objectMapper.writeValueAsString(Map.of(
+            "type", "userJoined",
+            "userId", joinedUserId
+        ));
+        session.sendMessage(new TextMessage(message));
+    }
+
+    private void broadcastChatMessage(String payload, String fromUserId) throws IOException {
+        for (Map.Entry<String, WebSocketSession> entry : sessions.entrySet()) {
+            if (!entry.getKey().equals(fromUserId) && 
+                activeUsers.getOrDefault(entry.getKey(), false) && 
+                entry.getValue().isOpen()) {
+                entry.getValue().sendMessage(new TextMessage(payload));
             }
         }
     }
