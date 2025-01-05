@@ -2,4 +2,4 @@ FROM openjdk:21
 ARG JAR_FILE=target/*.jar
 COPY ${JAR_FILE} service-registry.jar
 ENTRYPOINT ["java","-jar","/service-registry.jar"]
-EXPOSE port 8761
+EXPOSE 8761
