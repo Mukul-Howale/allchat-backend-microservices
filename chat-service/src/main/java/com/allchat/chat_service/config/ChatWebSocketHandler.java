@@ -38,13 +38,6 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
         String userId = extractUserId(session);
         sessions.put(userId, session);
         log.info("User connected: {}", userId);
-
-        // Send existing active users to the new user
-        for (Map.Entry<String, Boolean> entry : activeUsers.entrySet()) {
-            if (entry.getValue() && !entry.getKey().equals(userId)) {
-                notifyUserJoined(session, entry.getKey());
-            }
-        }
     }
 
     @Override
