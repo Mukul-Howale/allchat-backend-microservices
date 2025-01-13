@@ -105,32 +105,6 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
         return query.substring(query.indexOf("=") + 1);
     }
 
-    private void broadcastUserJoined(String userId) throws Exception {
-        String message = new ObjectMapper().writeValueAsString(Map.of(
-            "type", "userJoined",
-            "userId", userId
-        ));
-        
-        for (WebSocketSession session : sessions.values()) {
-            if (session.isOpen()) {
-                session.sendMessage(new TextMessage(message));
-            }
-        }
-    }
-
-    private void broadcastUserLeft(String userId) throws Exception{
-        String message = new ObjectMapper().writeValueAsString(Map.of(
-            "type", "userLeft",
-            "userId", userId
-        ));
-        
-        for (WebSocketSession session : sessions.values()) {
-            if (session.isOpen()) {
-                session.sendMessage(new TextMessage(message));
-            }
-        }
-    }
-
     private void handleReadyMessage(String userId) throws IOException {
         // Mark user as active
         activeUsers.put(userId, true);
