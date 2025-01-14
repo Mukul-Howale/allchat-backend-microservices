@@ -5,18 +5,19 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
-import org.springframework.web.socket.WebSocketMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import io.micrometer.common.lang.NonNull;
 
 import java.io.IOException;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 /**
     Why use TextWebSocketHandler instead of WebSocketHandler ?
@@ -29,8 +30,9 @@ import java.util.concurrent.ConcurrentHashMap;
 public class ChatWebSocketHandler extends TextWebSocketHandler {
 
     private static final Logger log = LoggerFactory.getLogger(ChatWebSocketHandler.class);
-    private final Map<String , WebSocketSession> sessions = new ConcurrentHashMap<>();
-    private final Map<String, Boolean> activeUsers = new ConcurrentHashMap<>(); // Track active users
+    private final Map<String, WebSocketSession> sessions = new ConcurrentHashMap<>();
+    private final Map<String, Boolean> lookingForMatch = new ConcurrentHashMap<>();
+    private final Map<String, Set<String>> matchedGroups = new ConcurrentHashMap<>();
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
@@ -43,22 +45,25 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
     @Override
     public void handleTextMessage(@NonNull WebSocketSession session, @NonNull TextMessage message) throws Exception {
         String userId = extractUserId(session);
-        JsonNode jsonNode = objectMapper.readTree(message.getPayload().toString());
+        JsonNode jsonNode = objectMapper.readTree(message.getPayload());
         String type = jsonNode.get("type").asText();
 
         log.info("Received message type: {} from user: {}", type, userId);
 
         switch (type) {
-            case "ready":
-                handleReadyMessage(userId);
+            case "looking-for-match":
+                handleLookingForMatch(userId);
+                break;
+            case "cancel-match":
+                handleCancelMatch(userId);
                 break;
             case "offer":
             case "answer":
             case "ice-candidate":
-                forwardWebRTCMessage(message.getPayload().toString(), jsonNode);
+                forwardWebRTCMessage(message.getPayload(), jsonNode);
                 break;
             case "chat":
-                broadcastChatMessage(message.getPayload().toString(), userId);
+                handleChatMessage(message.getPayload(), userId);
                 break;
         }
     }
@@ -66,49 +71,96 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
     @Override
     public void afterConnectionClosed(@NonNull WebSocketSession session, @NonNull CloseStatus closeStatus) throws Exception {
         String userId = extractUserId(session);
+        handleUserDisconnection(userId);
         sessions.remove(userId);
-        activeUsers.remove(userId);
-
-        // Notify others that user has left
-        String message = objectMapper.writeValueAsString(Map.of(
-            "type", "userLeft",
-            "userId", userId
-        ));
-
-        for (WebSocketSession otherSession : sessions.values()) {
-            if (otherSession.isOpen()) {
-                otherSession.sendMessage(new TextMessage(message));
-            }
-        }
-
         log.info("User disconnected: {}", userId);
     }
 
-    @Override
-    public void handleTransportError(WebSocketSession session, Throwable exception) throws Exception {
-        String userId = extractUserId(session);
-        log.error("Transport error for user {}: {}", userId, exception.getMessage());
-        // Clean up the user's session
-        sessions.remove(userId);
-        activeUsers.remove(userId);
-    }
+    private void handleUserDisconnection(String userId) throws IOException {
+        // Remove from looking for match pool
+        lookingForMatch.remove(userId);
 
-    private String extractUserId(WebSocketSession session){
-        String query = session.getUri().getQuery();
-        return query.substring(query.indexOf("=") + 1);
-    }
+        // Handle matched group cleanup
+        Set<String> userGroup = matchedGroups.get(userId);
+        if (userGroup != null) {
+            userGroup.remove(userId);
+            
+            // Notify remaining users in the group
+            notifyGroupAboutUserLeft(userGroup, userId);
 
-    private void handleReadyMessage(String userId) throws IOException {
-        // Mark user as active
-        activeUsers.put(userId, true);
-        log.info("User ready: {}", userId);
-
-        // Notify all other users about this user
-        for (WebSocketSession session : sessions.values()) {
-            String otherUserId = extractUserId(session);
-            if (!otherUserId.equals(userId)) {
-                notifyUserJoined(session, userId);
+            // If group size falls below 2, end the chat
+            if (userGroup.size() < 2) {
+                endGroupChat(userGroup);
             }
+        }
+    }
+
+    private void handleLookingForMatch(String userId) throws IOException {
+        lookingForMatch.put(userId, true);
+        log.info("User {} is looking for a match", userId);
+
+        // Try to find matches
+        List<String> availableUsers = lookingForMatch.entrySet().stream()
+                .filter(entry -> entry.getValue() && !entry.getKey().equals(userId))
+                .map(Map.Entry::getKey)
+                .collect(Collectors.toList());
+
+        // If we have enough users for a match (2 or more)
+        if (availableUsers.size() >= 1) {
+            // Create a new group with the current user and one other user
+            Set<String> matchedGroup = new HashSet<>();
+            matchedGroup.add(userId);
+            matchedGroup.add(availableUsers.get(0));
+
+            // Update matched groups
+            matchedGroup.forEach(uid -> {
+                matchedGroups.put(uid, matchedGroup);
+                lookingForMatch.remove(uid);
+            });
+
+            // Notify matched users
+            notifyMatchFound(matchedGroup);
+        }
+    }
+
+    private void handleCancelMatch(String userId) throws IOException {
+        lookingForMatch.remove(userId);
+        sendToUser(userId, createMessage("match-cancelled", null, userId));
+        log.info("User {} cancelled matching", userId);
+    }
+
+    private void handleChatMessage(String payload, String fromUserId) throws IOException {
+        Set<String> userGroup = matchedGroups.get(fromUserId);
+        if (userGroup != null) {
+            for (String toUserId : userGroup) {
+                if (!toUserId.equals(fromUserId)) {
+                    sendToUser(toUserId, payload);
+                }
+            }
+        }
+    }
+
+    private void notifyMatchFound(Set<String> matchedGroup) throws IOException {
+        String matchFoundMessage = createMessage("match-found", matchedGroup, null);
+        for (String userId : matchedGroup) {
+            sendToUser(userId, matchFoundMessage);
+        }
+    }
+
+    private void notifyGroupAboutUserLeft(Set<String> group, String leftUserId) throws IOException {
+        String message = createMessage("user-left-match", null, leftUserId);
+        for (String userId : group) {
+            if (!userId.equals(leftUserId)) {
+                sendToUser(userId, message);
+            }
+        }
+    }
+
+    private void endGroupChat(Set<String> group) throws IOException {
+        String message = createMessage("chat-ended", null, null);
+        for (String userId : group) {
+            sendToUser(userId, message);
+            matchedGroups.remove(userId);
         }
     }
 
@@ -117,30 +169,38 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
         String from = message.get("from").asText();
         String type = message.get("type").asText();
 
-        WebSocketSession recipientSession = sessions.get(to);
-        if (recipientSession != null && recipientSession.isOpen()) {
-            log.info("Forwarding {} signal from {} to {}", type, from, to);
-            recipientSession.sendMessage(new TextMessage(payload));
-        } else {
-            log.warn("Cannot forward {} signal to user {}: user not found or session closed", type, to);
-        }
-    }
-
-    private void notifyUserJoined(WebSocketSession session, String joinedUserId) throws IOException {
-        String message = objectMapper.writeValueAsString(Map.of(
-            "type", "userJoined",
-            "userId", joinedUserId
-        ));
-        session.sendMessage(new TextMessage(message));
-    }
-
-    private void broadcastChatMessage(String payload, String fromUserId) throws IOException {
-        for (Map.Entry<String, WebSocketSession> entry : sessions.entrySet()) {
-            if (!entry.getKey().equals(fromUserId) && 
-                activeUsers.getOrDefault(entry.getKey(), false) && 
-                entry.getValue().isOpen()) {
-                entry.getValue().sendMessage(new TextMessage(payload));
+        // Only forward if users are in the same matched group
+        Set<String> fromGroup = matchedGroups.get(from);
+        if (fromGroup != null && fromGroup.contains(to)) {
+            WebSocketSession recipientSession = sessions.get(to);
+            if (recipientSession != null && recipientSession.isOpen()) {
+                log.info("Forwarding {} signal from {} to {}", type, from, to);
+                recipientSession.sendMessage(new TextMessage(payload));
             }
         }
+    }
+
+    private String createMessage(String type, Set<String> users, String userId) throws IOException {
+        ObjectNode message = objectMapper.createObjectNode();
+        message.put("type", type);
+        if (users != null) {
+            message.put("users", objectMapper.valueToTree(users));
+        }
+        if (userId != null) {
+            message.put("userId", userId);
+        }
+        return objectMapper.writeValueAsString(message);
+    }
+
+    private void sendToUser(String userId, String message) throws IOException {
+        WebSocketSession session = sessions.get(userId);
+        if (session != null && session.isOpen()) {
+            session.sendMessage(new TextMessage(message));
+        }
+    }
+
+    private String extractUserId(WebSocketSession session) {
+        String query = session.getUri().getQuery();
+        return query.substring(query.indexOf("=") + 1);
     }
 }
