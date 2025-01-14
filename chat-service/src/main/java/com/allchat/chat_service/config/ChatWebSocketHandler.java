@@ -19,6 +19,13 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
+/**
+    Why use TextWebSocketHandler instead of WebSocketHandler ?
+    The WebSocketHandler interface is the base interface for WebSocket handlers.
+    The TextWebSocketHandler class extends the AbstractWebSocketHandler
+    which implements the WebSocketHandler interface and provides additional methods for handling text messages.
+ */
+
 @Component
 public class ChatWebSocketHandler extends TextWebSocketHandler {
 
@@ -32,9 +39,9 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
     public void afterConnectionEstablished(@NonNull WebSocketSession session) throws Exception {
         String userId = extractUserId(session);
         sessions.put(userId, session);
-        log.info("WebSocket connection established - User: {}, Session ID: {}, Remote Address: {}", 
-            userId, session.getId(), session.getRemoteAddress());
-        log.debug("Current active sessions count: {}", sessions.size());
+        log.info("WebSocket connection established - User: {}, Session ID: {}, Remote Address: {}",
+        userId, session.getId(), session.getRemoteAddress());
+        log.info("Current active sessions count: {}", sessions.size());
     }
 
     @Override
@@ -44,8 +51,8 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
         String type = jsonNode.get("type").asText();
 
         log.info("Received message - Type: {}, From User: {}, Session ID: {}, Payload Size: {} bytes", 
-            type, userId, session.getId(), message.getPayloadLength());
-        log.debug("Message payload: {}", message.getPayload());
+        type, userId, session.getId(), message.getPayloadLength());
+        log.info("Message payload: {}", message.getPayload());
 
         try {
             switch (type) {
@@ -119,7 +126,7 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
     private void handleLookingForMatch(String userId) throws IOException {
         lookingForMatch.put(userId, true);
         log.info("User started looking for match - User: {}", userId);
-        log.debug("Current users looking for match: {}", lookingForMatch.size());
+        log.info("Current users looking for match: {}", lookingForMatch.size());
 
         // Try to find matches
         List<String> availableUsers = lookingForMatch.entrySet().stream()
