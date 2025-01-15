@@ -70,6 +70,9 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
                 case "chat":
                     handleChatMessage(message.getPayload(), userId);
                     break;
+                case "end-chat":
+                    handleEndChat(userId);
+                    break;
                 default:
                     log.warn("Unhandled message type received - Type: {}, User: {}", type, userId);
             }
@@ -183,6 +186,16 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
         }
     }
 
+    private void handleEndChat(String userId) throws IOException {
+        Set<String> userGroup = matchedGroups.get(userId);
+        if (userGroup != null) {
+            log.info("Ending chat for user - User: {}, Group Size: {}", userId, userGroup.size());
+            endGroupChat(userGroup);
+        } else {
+            log.warn("End chat request received from user not in any group - User: {}", userId);
+        }
+    }
+
     private void notifyMatchFound(Set<String> matchedGroup) throws IOException {
         String matchFoundMessage = createMessage("match-found", matchedGroup, null);
         log.info("Sending match found notifications - Group Size: {}", matchedGroup.size());
@@ -211,12 +224,26 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
     }
 
     private void endGroupChat(Set<String> group) throws IOException {
-        String message = createMessage("chat-ended", null, null);
+        if (group == null || group.isEmpty()) {
+            log.warn("Attempted to end empty or null group chat");
+            return;
+        }
+
         log.info("Ending group chat - Group Size: {}", group.size());
         
+        // Send end-chat message to all users in the group
         for (String userId : group) {
-            sendToUser(userId, message);
+            // Remove from matched groups
             matchedGroups.remove(userId);
+            
+            // Add back to looking for match except for the initiator
+            if (!userId.equals(group.iterator().next())) {
+                lookingForMatch.put(userId, true);
+                log.debug("Added user back to matching pool - User: {}", userId);
+            }
+            
+            // Send end-chat message
+            sendToUser(userId, createMessage("end-chat", null, group.iterator().next()));
         }
         
         log.debug("Group chat ended - Cleanup completed");
@@ -228,9 +255,15 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
         String type = message.get("type").asText();
 
         log.debug("Processing WebRTC message - Type: {}, From: {}, To: {}", type, from, to);
+        
+        // Debug logging for matched groups
+        Set<String> fromGroup = matchedGroups.get(from);
+        Set<String> toGroup = matchedGroups.get(to);
+        log.info("Matched groups state - From user group: {}, To user group: {}", 
+            fromGroup != null ? fromGroup : "null", 
+            toGroup != null ? toGroup : "null");
 
         // Only forward if users are in the same matched group
-        Set<String> fromGroup = matchedGroups.get(from);
         if (fromGroup != null && fromGroup.contains(to)) {
             WebSocketSession recipientSession = sessions.get(to);
             if (recipientSession != null && recipientSession.isOpen()) {
