@@ -13,6 +13,7 @@ spring:
 # the bug was I had written post instead of port
 # really need to get new glasses
 server:
+  address: 0.0.0.0  # Bind to all network interfaces
   port: 8093
 
 eureka:
