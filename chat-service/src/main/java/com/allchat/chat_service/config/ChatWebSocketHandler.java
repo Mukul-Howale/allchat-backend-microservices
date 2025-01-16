@@ -310,13 +310,9 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
     private String createMessage(String type, Set<String> users, String userId) throws IOException {
         ObjectNode message = objectMapper.createObjectNode();
         message.put("type", type);
-        if (users != null) {
-            message.put("users", objectMapper.valueToTree(users));
-        }
-        if (userId != null) {
-            message.put("userId", userId);
-        }
-        
+        if (users != null) message.put("users", objectMapper.valueToTree(users));
+        if (userId != null) message.put("userId", userId);
+
         String messageStr = objectMapper.writeValueAsString(message);
         log.debug("Created message - Type: {}, Size: {} bytes", type, messageStr.length());
         return messageStr;
