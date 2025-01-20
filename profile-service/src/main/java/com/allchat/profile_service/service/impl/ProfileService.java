@@ -51,4 +51,19 @@ public class ProfileService implements IProfileService {
             throw new Exception();
         }
     }
+
+    // Send friend request
+    // Accept friend request
+    // Remove friend
+    // Block user
+    // Report user
+    // Unblock user 
+    // Get user's profile
+    // Get all profiles
+    // Update profile
+    // Delete profile
+    // Get all users
+    // Get user's friends
+    // Get user's likes
+    // Get user's dislikes
 }
