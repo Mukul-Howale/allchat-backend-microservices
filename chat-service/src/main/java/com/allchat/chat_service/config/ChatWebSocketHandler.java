@@ -20,21 +20,41 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 /**
-    Why use TextWebSocketHandler instead of WebSocketHandler ?
+ * WebSocket handler for managing real-time chat communications.
+ * Extends TextWebSocketHandler to handle text-based WebSocket messages.
+ * 
+ * This handler manages:
+ * - User connections and disconnections
+ * - User matching for chat sessions
+ * - Message routing between matched users
+ * - WebRTC signaling for peer-to-peer connections
+ * 
+ *  Why use TextWebSocketHandler instead of WebSocketHandler ?
     The WebSocketHandler interface is the base interface for WebSocket handlers.
     The TextWebSocketHandler class extends the AbstractWebSocketHandler
     which implements the WebSocketHandler interface and provides additional methods for handling text messages.
  */
-
 @Component
 public class ChatWebSocketHandler extends TextWebSocketHandler {
 
     private static final Logger log = LoggerFactory.getLogger(ChatWebSocketHandler.class);
+
+    /** Maps user IDs to their WebSocket sessions */
     private final Map<String, WebSocketSession> sessions = new ConcurrentHashMap<>();
+    
+    /** Tracks users who are currently looking for a chat match */
     private final Map<String, Boolean> lookingForMatch = new ConcurrentHashMap<>();
+    
+    /** Maps user IDs to their matched group (set of users in the same chat) */
     private final Map<String, Set<String>> matchedGroups = new ConcurrentHashMap<>();
+    
+    /** JSON object mapper for message serialization/deserialization */
     private final ObjectMapper objectMapper = new ObjectMapper();
 
+    /**
+     * Handles new WebSocket connections.
+     * Extracts user ID and stores the session for future communication.
+     */
     @Override
     public void afterConnectionEstablished(@NonNull WebSocketSession session) throws Exception {
         String userId = extractUserId(session);
@@ -43,6 +63,15 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
             userId, session.getId(), session.getRemoteAddress(), sessions.keySet());
     }
 
+    /**
+     * Processes incoming WebSocket messages.
+     * Handles different message types:
+     * - looking-for-match: User wants to start a chat
+     * - cancel-match: User cancels match search
+     * - offer/answer/ice-candidate: WebRTC signaling
+     * - chat: Regular chat messages
+     * - end-chat: User ends the chat session
+     */
     @Override
     public void handleTextMessage(@NonNull WebSocketSession session, @NonNull TextMessage message) throws Exception {
         String userId = extractUserId(session);
@@ -83,6 +112,10 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
         }
     }
 
+    /**
+     * Handles WebSocket connection closures.
+     * Cleans up user session and notifies other users in the group.
+     */
     @Override
     public void afterConnectionClosed(@NonNull WebSocketSession session, @NonNull CloseStatus closeStatus) throws Exception {
         String userId = extractUserId(session);
@@ -100,6 +133,10 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
         }
     }
 
+    /**
+     * Performs cleanup when a user disconnects.
+     * Removes user from matching pool and handles group cleanup.
+     */
     private void handleUserDisconnection(String userId) throws IOException {
         log.debug("Starting user disconnection cleanup - User: {}", userId);
         
@@ -127,6 +164,10 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
         }
     }
 
+    /**
+     * Processes match requests from users.
+     * Attempts to pair users looking for matches into chat groups.
+     */
     private void handleLookingForMatch(String userId) throws IOException {
         // Log the current state before matching
         log.info("Starting match search - User: {}, Current matched groups: {}, Looking for match: {}", 
@@ -174,6 +215,10 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
         }
     }
 
+    /**
+     * Handles match cancellation requests.
+     * Removes user from the matching pool.
+     */
     private void handleCancelMatch(String userId) throws IOException {
         Boolean wasLooking = lookingForMatch.remove(userId);
         log.info("User cancelled matching - User: {}, Was Looking: {}, Current Looking: {}", 
@@ -181,6 +226,10 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
         sendToUser(userId, createMessage("match-cancelled", null, userId));
     }
 
+    /**
+     * Routes chat messages between matched users.
+     * Only forwards messages to users in the same group.
+     */
     private void handleChatMessage(String payload, String fromUserId) throws IOException {
         Set<String> userGroup = matchedGroups.get(fromUserId);
         if (userGroup != null) {
@@ -200,6 +249,10 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
         }
     }
 
+    /**
+     * Processes chat end requests.
+     * Cleans up the chat group and notifies all participants.
+     */
     private void handleEndChat(String userId) throws IOException {
         Set<String> userGroup = matchedGroups.get(userId);
         if (userGroup != null) {
@@ -212,6 +265,10 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
         }
     }
 
+    /**
+     * Sends match notifications to users when a match is found.
+     * Includes information about all users in the matched group.
+     */
     private void notifyMatchFound(Set<String> matchedGroup) throws IOException {
         log.info("Preparing match notifications - Group: {}, Current matched groups: {}", 
             matchedGroup, matchedGroups);
@@ -227,6 +284,9 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
         log.info("Match notifications completed - Group: {}", matchedGroup);
     }
 
+    /**
+     * Notifies remaining users when someone leaves the chat group.
+     */
     private void notifyGroupAboutUserLeft(Set<String> group, String leftUserId) throws IOException {
         String message = createMessage("user-left-match", null, leftUserId);
         log.info("Notifying group about user departure - Left User: {}, Remaining Group Size: {}", 
@@ -243,6 +303,10 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
         log.debug("User left notifications sent - Recipients: {}", notificationsSent);
     }
 
+    /**
+     * Ends a group chat session.
+     * Cleans up group state and optionally returns users to matching pool.
+     */
     private void endGroupChat(Set<String> group) throws IOException {
         if (group == null || group.isEmpty()) {
             log.warn("Attempted to end empty or null group chat - Current Groups: {}", matchedGroups);
@@ -274,6 +338,10 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
             matchedGroups, lookingForMatch.keySet());
     }
 
+    /**
+     * Handles WebRTC signaling messages between matched users.
+     * Ensures messages are only forwarded between properly matched users.
+     */
     private void forwardWebRTCMessage(String payload, JsonNode message) throws IOException {
         String to = message.get("to").asText();
         String from = message.get("from").asText();
@@ -307,6 +375,13 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
         }
     }
 
+    /**
+     * Creates a formatted JSON message for WebSocket communication.
+     * @param type Message type identifier
+     * @param users Set of users involved (optional)
+     * @param userId Specific user ID (optional)
+     * @return JSON string representation of the message
+     */
     private String createMessage(String type, Set<String> users, String userId) throws IOException {
         ObjectNode message = objectMapper.createObjectNode();
         message.put("type", type);
@@ -318,6 +393,9 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
         return messageStr;
     }
 
+    /**
+     * Sends a message to a specific user if their session is active.
+     */
     private void sendToUser(String userId, String message) throws IOException {
         WebSocketSession session = sessions.get(userId);
         if (session != null && session.isOpen()) {
@@ -328,6 +406,10 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
         }
     }
 
+    /**
+     * Extracts user ID from WebSocket session query parameters.
+     * Expected format: "?userId=<value>"
+     */
     private String extractUserId(WebSocketSession session) {
         String query = session.getUri().getQuery();
         String userId = query.substring(query.indexOf("=") + 1);
