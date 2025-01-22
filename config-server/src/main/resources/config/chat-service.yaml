@@ -6,8 +6,8 @@ spring:
     url: jdbc:postgresql://localhost:5432/allchat
     username: postgres
     password: allchat@12345
-  websocket:
-    enabled: true
+  # websocket:
+  #   enabled: true
 
 # Was searching for a bug for past 30 mins
 # tomcat was running on 8080 even after assigning
@@ -16,15 +16,15 @@ spring:
 # really need to get new glasses
 server:
   address: 0.0.0.0  # Bind to all network interfaces
-  port: 8443
-  ssl:
-    enabled: true
-    key-store-type: PKCS12
-    key-store: classpath:chatservice.p12
-    key-store-password: chatservice123
-    key-alias: chatservice
-  http:
-    port: 8093  # Keep your original port for non-SSL traffic
+  port: 8093
+  # ssl:
+  #   enabled: true
+  #   key-store-type: PKCS12
+  #   key-store: classpath:chatservice.p12
+  #   key-store-password: chatservice123
+  #   key-alias: chatservice
+  # http:
+  #   port: 8093  # Keep your original port for non-SSL traffic
 
 eureka:
   client:

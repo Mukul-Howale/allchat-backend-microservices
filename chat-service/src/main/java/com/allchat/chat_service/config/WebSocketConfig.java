@@ -41,7 +41,7 @@ public class WebSocketConfig implements WebSocketConfigurer {
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
         registry.addHandler(chatWebSocketHandler, "/ws")  // Registers WebSocket endpoint at /ws
                 .setAllowedOrigins("*")                   // Enables CORS for all origins
-                .addInterceptors(chatHandshakeInterceptor)// Adds handshake interceptor for connection setup
-                .withSockJS();                            // Enables SockJS fallback for browsers that don't support WebSocket
+                .addInterceptors(chatHandshakeInterceptor);// Adds handshake interceptor for connection setup
+                // .withSockJS();                            // Enables SockJS fallback for browsers that don't support WebSocket
     }
 }
