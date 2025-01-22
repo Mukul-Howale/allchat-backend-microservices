@@ -4,6 +4,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.socket.config.annotation.EnableWebSocket;
 import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
 import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry;
+import org.springframework.web.socket.server.support.DefaultHandshakeHandler;
 
 /**
  * WebSocket Configuration class that sets up and configures WebSocket endpoints for the chat service.
@@ -41,7 +42,7 @@ public class WebSocketConfig implements WebSocketConfigurer {
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
         registry.addHandler(chatWebSocketHandler, "/ws")  // Registers WebSocket endpoint at /ws
                 .setAllowedOrigins("*")                   // Enables CORS for all origins
-                .addInterceptors(chatHandshakeInterceptor);// Adds handshake interceptor for connection setup
-                // .withSockJS();                            // Enables SockJS fallback for browsers that don't support WebSocket
+                .addInterceptors(chatHandshakeInterceptor)// Adds handshake interceptor for connection setup
+                .setHandshakeHandler(new DefaultHandshakeHandler());
     }
 }
