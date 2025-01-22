@@ -10,14 +10,15 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.allchat.chat_service.service.ChatService;
 
-import lombok.RequiredArgsConstructor;
-
 @RestController
 @RequestMapping("/chat")
-@RequiredArgsConstructor
 public class ChatController {
 
     private final ChatService chatService;
+
+    public ChatController(ChatService chatService) {
+        this.chatService = chatService;
+    }
 
     private static final Logger log = LoggerFactory.getLogger(ChatController.class);
 
