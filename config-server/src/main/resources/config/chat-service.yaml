@@ -24,7 +24,7 @@ server:
   #   key-store-password: chatservice123
   #   key-alias: chatservice
   # http:
-  #   port: 8093  # Keep your original port for non-SSL traffic
+  #   port: 8093  # Keep your original port for non-SSL traffic.
 
 eureka:
   client:
