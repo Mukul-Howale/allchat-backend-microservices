@@ -39,18 +39,40 @@ public class ProfileService implements IProfileService {
 
     public ProfileResponseDto getProfile(String profileId) throws Exception {
         try{
-            Optional<Profile> profile = profileRepository.findById(profileId);
-            if(profile.isEmpty()) {
+            Optional<Profile> optionalProfile = profileRepository.findById(profileId);
+            if(optionalProfile.isEmpty()) {
                 throw new Exception("No profile found");
             }
             log.info("Profile fetched");
-            return new ProfileResponseDto(profile.get().getId(),profile.get().getFriends(),
-                    profile.get().getLikes(), profile.get().getDislikes(), profile.get().getProfilePictureURL());
+            return ProfileResponseDto.builder()
+                    .id(optionalProfile.get().getId())
+                    .friends(optionalProfile.get().getFriends())
+                    .likes(optionalProfile.get().getLikes())
+                    .dislikes(optionalProfile.get().getDislikes())
+                    .profilePicturesURL(optionalProfile.get().getProfilePictureURL())
+                    .build();
         }
         catch (Exception e){
             throw new Exception();
         }
     }
+
+    public Boolean addLike(String profileId) throws Exception{
+        try{
+            Optional<Profile> optionalProfile = profileRepository.findById(profileId);
+            if(optionalProfile.isEmpty()) {
+                log.error("method : addLike(String profileId), message : no profile found");
+                throw new Exception("No profile found");
+            }
+            log.info("profile fetched");
+            optionalProfile.get().setLikes(optionalProfile.get().getLikes().add(BigInteger.ONE));
+            profileRepository.save(optionalProfile.get());
+            return true;
+        }
+        catch (Exception e){
+            throw new Exception();
+        }
+        }
 
     // Send friend request
     // Accept friend request
@@ -66,4 +88,6 @@ public class ProfileService implements IProfileService {
     // Get user's friends
     // Get user's likes
     // Get user's dislikes
+    // Add like
+    // Add dislike
 }

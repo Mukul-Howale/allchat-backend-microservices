@@ -187,7 +187,7 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
         log.info("Available users for matching - User: {}, Available: {}", userId, availableUsers);
 
         // If we have enough users for a match (2 or more)
-        if (availableUsers.size() >= 1) {
+        if (!availableUsers.isEmpty()) {
             // Create a new group with the current user and one other user
             Set<String> matchedGroup = new HashSet<>();
             matchedGroup.add(userId);

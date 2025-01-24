@@ -7,4 +7,6 @@ public interface IProfileService {
     ProfileResponseDto createProfile(String userId) throws Exception;
 
     ProfileResponseDto getProfile(String profileId) throws Exception;
+
+    Boolean addLike(String profileId) throws Exception;
 }

@@ -2,6 +2,7 @@ package com.allchat.profile_service.controller;
 
 import com.allchat.profile_service.dto.ProfileResponseDto;
 import com.allchat.profile_service.service.IProfileService;
+import jakarta.validation.constraints.Null;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,5 +25,11 @@ public class ProfileController {
         return new ResponseEntity<>(profileService.getProfile(profileId), HttpStatus.OK);
     }
 
+    @PatchMapping("like/{profileId}")
+    public ResponseEntity<Boolean> addLike(@PathVariable String profileId) throws Exception {
+        boolean likeAdded = profileService.addLike(profileId);
+        if(likeAdded) return new ResponseEntity<>(true, HttpStatus.ACCEPTED);
+        return new ResponseEntity<>(false, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
 
 }
