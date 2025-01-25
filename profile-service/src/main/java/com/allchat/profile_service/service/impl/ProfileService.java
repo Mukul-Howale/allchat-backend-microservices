@@ -1,11 +1,13 @@
 package com.allchat.profile_service.service.impl;
 
 import com.allchat.profile_service.dto.ProfileResponseDto;
+import com.allchat.profile_service.exception.NoSuchProfileException;
 import com.allchat.profile_service.model.Profile;
 import com.allchat.profile_service.service.IProfileService;
 import com.allchat.profile_service.repository.ProfileRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import java.math.BigInteger;
@@ -17,6 +19,8 @@ import java.util.Optional;
 public class ProfileService implements IProfileService {
 
     private final ProfileRepository profileRepository;
+
+    private final ModelMapper modelMapper;
 
     public ProfileResponseDto createProfile(String userId) throws Exception {
         try {
@@ -41,16 +45,10 @@ public class ProfileService implements IProfileService {
         try{
             Optional<Profile> optionalProfile = profileRepository.findById(profileId);
             if(optionalProfile.isEmpty()) {
-                throw new Exception("No profile found");
+                throw new NoSuchProfileException("No profile found");
             }
             log.info("Profile fetched");
-            return ProfileResponseDto.builder()
-                    .id(optionalProfile.get().getId())
-                    .friends(optionalProfile.get().getFriends())
-                    .likes(optionalProfile.get().getLikes())
-                    .dislikes(optionalProfile.get().getDislikes())
-                    .profilePicturesURL(optionalProfile.get().getProfilePictureURL())
-                    .build();
+            return modelMapper.map(optionalProfile.get(), ProfileResponseDto.class);
         }
         catch (Exception e){
             throw new Exception();
@@ -85,6 +83,16 @@ public class ProfileService implements IProfileService {
             optionalProfile.get().setDislikes(optionalProfile.get().getDislikes().add(BigInteger.ONE));
             profileRepository.save(optionalProfile.get());
             return true;
+        }
+        catch (Exception e){
+            throw new Exception();
+        }
+    }
+
+    private Profile fetchProfile(String profileId) throws Exception{
+        try{
+            Optional<Profile> profile = profileRepository.findById(profileId);
+
         }
         catch (Exception e){
             throw new Exception();
