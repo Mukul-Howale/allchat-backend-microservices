@@ -9,4 +9,6 @@ public interface IProfileService {
     ProfileResponseDto getProfile(String profileId) throws Exception;
 
     Boolean addLike(String profileId) throws Exception;
+
+    Boolean addDislike(String profileId) throws Exception;
 }

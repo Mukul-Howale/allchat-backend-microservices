@@ -72,7 +72,24 @@ public class ProfileService implements IProfileService {
         catch (Exception e){
             throw new Exception();
         }
+    }
+
+    public Boolean addDislike(String profileId) throws Exception{
+        try{
+            Optional<Profile> optionalProfile = profileRepository.findById(profileId);
+            if(optionalProfile.isEmpty()) {
+                log.error("method : addDislike(String profileId), message : no profile found");
+                throw new Exception("No profile found");
+            }
+            log.info("profile fetched");
+            optionalProfile.get().setDislikes(optionalProfile.get().getDislikes().add(BigInteger.ONE));
+            profileRepository.save(optionalProfile.get());
+            return true;
         }
+        catch (Exception e){
+            throw new Exception();
+        }
+    }
 
     // Send friend request
     // Accept friend request
