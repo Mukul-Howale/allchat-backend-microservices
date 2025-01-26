@@ -19,3 +19,5 @@ http://localhost:8092
 
 chat-service
 http://localhost:8093
+
+notification-service
