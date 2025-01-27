@@ -23,7 +23,7 @@ public class ProfileService implements IProfileService {
     private final ModelMapper modelMapper;
 
     public ProfileResponseDto createProfile(String userId) throws Exception {
-        try {
+        try{
             Profile profile = Profile.builder()
                     .friends(new BigInteger("0"))
                     .likes(new BigInteger("0"))
@@ -44,7 +44,7 @@ public class ProfileService implements IProfileService {
     public ProfileResponseDto getProfile(String profileId) throws Exception {
         try{
             Optional<Profile> optionalProfile = profileRepository.findById(profileId);
-            if(optionalProfile.isEmpty()) {
+            if(optionalProfile.isEmpty()){
                 throw new NoSuchProfileException("No profile found");
             }
             log.info("Profile fetched");
@@ -58,7 +58,7 @@ public class ProfileService implements IProfileService {
     public Boolean addLike(String profileId) throws Exception{
         try{
             Optional<Profile> optionalProfile = profileRepository.findById(profileId);
-            if(optionalProfile.isEmpty()) {
+            if(optionalProfile.isEmpty()){
                 log.error("method : addLike(String profileId), message : no profile found");
                 throw new Exception("No profile found");
             }
@@ -75,7 +75,7 @@ public class ProfileService implements IProfileService {
     public Boolean addDislike(String profileId) throws Exception{
         try{
             Optional<Profile> optionalProfile = profileRepository.findById(profileId);
-            if(optionalProfile.isEmpty()) {
+            if(optionalProfile.isEmpty()){
                 log.error("method : addDislike(String profileId), message : no profile found");
                 throw new Exception("No profile found");
             }
@@ -83,16 +83,6 @@ public class ProfileService implements IProfileService {
             optionalProfile.get().setDislikes(optionalProfile.get().getDislikes().add(BigInteger.ONE));
             profileRepository.save(optionalProfile.get());
             return true;
-        }
-        catch (Exception e){
-            throw new Exception();
-        }
-    }
-
-    private Profile fetchProfile(String profileId) throws Exception{
-        try{
-            Optional<Profile> profile = profileRepository.findById(profileId);
-
         }
         catch (Exception e){
             throw new Exception();
