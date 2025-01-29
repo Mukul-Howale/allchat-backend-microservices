@@ -15,4 +15,6 @@ public interface IProfileService {
     Boolean sendFriendRequest(String fromId, String toId) throws Exception;
 
     Boolean acceptFriendRequest(String fromId, String toId) throws Exception;
+
+    Boolean removeFriend(String profileId, String friendId) throws Exception;
 }

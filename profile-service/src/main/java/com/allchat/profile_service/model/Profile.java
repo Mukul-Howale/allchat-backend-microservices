@@ -33,8 +33,13 @@ public class Profile {
     private List<String> receivedRequest;
 
     public void addFriend(String id){
-        setTotalFriends(getTotalFriends().add(BigInteger.ONE));
         friends.add(id);
+        setTotalFriends(getTotalFriends().add(BigInteger.ONE));
+    }
+
+    public void removeFriend(String id){
+        friends.remove(id);
+        setTotalFriends(getTotalFriends().subtract(BigInteger.ONE));
     }
 
     public void addSentRequest(String id){ sentRequest.add(id); }

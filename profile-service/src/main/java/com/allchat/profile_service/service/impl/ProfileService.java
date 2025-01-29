@@ -128,8 +128,23 @@ public class ProfileService implements IProfileService {
         }
     }
 
-    // Send friend request
-    // Accept friend request
+    public Boolean removeFriend(String profileId, String friendId) throws Exception{
+        try{
+            Optional<Profile> optionalProfile = profileRepository.findById(profileId);
+            Optional<Profile> optionalFriend = profileRepository.findById(friendId);
+            if (optionalProfile.isEmpty() || optionalFriend.isEmpty()){
+                log.error("method : removeFriend(String profileId, String friendId), message : no profile found");
+                throw new Exception("No profile found");
+            }
+            log.info("profile fetched");
+            optionalProfile.get().removeFriend(friendId);
+            optionalFriend.get().removeFriend(profileId);
+            return true;
+        }
+        catch (Exception e){
+            throw new Exception();
+        }
+    }
     // Remove friend
     // Block user
     // Report user

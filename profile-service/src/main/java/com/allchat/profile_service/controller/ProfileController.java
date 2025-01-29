@@ -53,4 +53,11 @@ public class ProfileController {
         if(requestAccepted) return new ResponseEntity<>(true, HttpStatus.ACCEPTED);
         return new ResponseEntity<>(false, HttpStatus.INTERNAL_SERVER_ERROR);
     }
+
+    @PatchMapping("/remove-friend/{profileId}/{friendId}")
+    public ResponseEntity<Boolean> removeFriend(@PathVariable String profileId, @PathVariable String friendId) throws Exception{
+        boolean friendRemoved = profileService.removeFriend(profileId,friendId);
+        if(friendRemoved) return new ResponseEntity<>(true, HttpStatus.ACCEPTED);
+        return new ResponseEntity<>(false, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
 }
