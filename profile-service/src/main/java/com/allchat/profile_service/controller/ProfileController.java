@@ -60,4 +60,9 @@ public class ProfileController {
         if(friendRemoved) return new ResponseEntity<>(true, HttpStatus.ACCEPTED);
         return new ResponseEntity<>(false, HttpStatus.INTERNAL_SERVER_ERROR);
     }
+
+    @GetMapping("/username")
+    public ResponseEntity<String> getUserName() throws Exception{
+        return new ResponseEntity<>(profileService.getUsername(), HttpStatus.ACCEPTED);
+    }
 }

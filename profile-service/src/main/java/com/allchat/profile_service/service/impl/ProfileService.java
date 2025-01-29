@@ -5,12 +5,19 @@ import com.allchat.profile_service.exception.NoSuchProfileException;
 import com.allchat.profile_service.model.Profile;
 import com.allchat.profile_service.service.IProfileService;
 import com.allchat.profile_service.repository.ProfileRepository;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import java.math.BigInteger;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.http.HttpRequest;
 import java.util.Optional;
 
 @Service
@@ -22,10 +29,13 @@ public class ProfileService implements IProfileService {
 
     private final ModelMapper modelMapper;
 
+    private final ObjectMapper objectMapper = new ObjectMapper();
+
     public ProfileResponseDto createProfile(String userId) throws Exception {
         try{
             Profile profile = Profile.builder()
                     .totalFriends(new BigInteger("0"))
+                    .username(generateUsername())
                     .paid(false)
                     .likes(new BigInteger("0"))
                     .dislikes(new BigInteger("0"))
@@ -145,7 +155,16 @@ public class ProfileService implements IProfileService {
             throw new Exception();
         }
     }
-    // Remove friend
+
+    public String getUsername() throws Exception { return  generateUsername(); }
+
+    private String generateUsername() throws URISyntaxException, JsonProcessingException {
+        HttpRequest request = HttpRequest.newBuilder(new URI("https://usernameapiv1.vercel.app/api/random-usernames")).build();
+        Optional<HttpRequest.BodyPublisher> bodyPublisher = request.bodyPublisher();
+        JsonNode jsonNode = objectMapper.readTree(bodyPublisher.get().toString());
+        return jsonNode.get("usernames").asText();
+    }
+
     // Block user
     // Report user
     // Unblock user 

@@ -22,6 +22,7 @@ public class Profile {
 
     private String userId;
 
+    private String username;
     private BigInteger totalFriends;
     private BigInteger likes;
     private BigInteger dislikes;
