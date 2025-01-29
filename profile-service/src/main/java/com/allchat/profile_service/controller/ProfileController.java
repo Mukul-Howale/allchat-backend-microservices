@@ -16,17 +16,17 @@ public class ProfileController {
 
     private final IProfileService profileService;
 
-    @PostMapping("/create-profile")
-    public ResponseEntity<ProfileResponseDto> createProfile(String userId) throws Exception {
+    @PostMapping("/create-profile/{userId}")
+    public ResponseEntity<ProfileResponseDto> createProfile(@PathVariable String userId) throws Exception {
         return new ResponseEntity<>(profileService.createProfile(userId), HttpStatus.CREATED);
     }
 
-    @GetMapping("get-profile")
-    public ResponseEntity<ProfileResponseDto> getProfile(String profileId) throws Exception {
+    @GetMapping("/get-profile/{profileId}")
+    public ResponseEntity<ProfileResponseDto> getProfile(@PathVariable String profileId) throws Exception {
         return new ResponseEntity<>(profileService.getProfile(profileId), HttpStatus.OK);
     }
 
-    @PatchMapping("like/{profileId}")
+    @PatchMapping("/like/{profileId}")
     public ResponseEntity<Boolean> addLike(@PathVariable String profileId) throws Exception {
         boolean likeAdded = profileService.addLike(profileId);
         if(likeAdded) return new ResponseEntity<>(true, HttpStatus.ACCEPTED);
@@ -40,4 +40,10 @@ public class ProfileController {
         return new ResponseEntity<>(false, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
+    @PostMapping("/friend-request/{fromId}/{toId}")
+    public ResponseEntity<Boolean> addFriend(@PathVariable String fromId, @PathVariable String toId) throws Exception{
+        boolean friendAdded = profileService.addFriend(fromId, toId);
+        if(friendAdded) return new ResponseEntity<>(true, HttpStatus.ACCEPTED);
+        return new ResponseEntity<>(false, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
 }

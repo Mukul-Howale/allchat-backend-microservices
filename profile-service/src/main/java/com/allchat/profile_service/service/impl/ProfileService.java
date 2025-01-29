@@ -89,6 +89,24 @@ public class ProfileService implements IProfileService {
         }
     }
 
+    public Boolean addFriend(String fromId, String toId) throws Exception{
+        try{
+            Optional<Profile> fromProfile = profileRepository.findById(fromId);
+            Optional<Profile> toProfile = profileRepository.findById(toId);
+            if (fromProfile.isEmpty() || toProfile.isEmpty()){
+                log.error("method : addFriend(String fromId, String toId), message : no profile found");
+                throw new Exception("No profile found");
+            }
+            log.info("profile fetched");
+            fromProfile.get().addFriends(toId);
+            toProfile.get().addFriends(fromId);
+            return true;
+        }
+        catch (Exception e){
+            throw new Exception();
+        }
+    }
+
     // Send friend request
     // Accept friend request
     // Remove friend
