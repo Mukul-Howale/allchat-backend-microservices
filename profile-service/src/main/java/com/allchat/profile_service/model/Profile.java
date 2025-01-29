@@ -20,17 +20,28 @@ public class Profile {
     @Id
     private String id;
 
+    private String userId;
+
     private BigInteger totalFriends;
     private BigInteger likes;
     private BigInteger dislikes;
-    //private boolean paid;
+    private boolean paid;
     private String profilePictureURL;
 
-    private String userId;
-
     private List<String> friends;
+    private List<String> sentRequest;
+    private List<String> receivedRequest;
 
-    public boolean addFriends(String friend){
-        return friends.add(friend);
+    public void addFriend(String id){
+        setTotalFriends(getTotalFriends().add(BigInteger.ONE));
+        friends.add(id);
     }
+
+    public void addSentRequest(String id){ sentRequest.add(id); }
+
+    public void removeSentRequest(String id){ sentRequest.remove(id); }
+
+    public void addReceivedRequest(String id){ receivedRequest.add(id); }
+
+    public void removeReceivedRequest(String id){ receivedRequest.remove(id); }
 }

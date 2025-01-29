@@ -25,7 +25,8 @@ public class ProfileService implements IProfileService {
     public ProfileResponseDto createProfile(String userId) throws Exception {
         try{
             Profile profile = Profile.builder()
-                    .friends(new BigInteger("0"))
+                    .totalFriends(new BigInteger("0"))
+                    .paid(false)
                     .likes(new BigInteger("0"))
                     .dislikes(new BigInteger("0"))
                     .profilePictureURL("")
@@ -33,7 +34,7 @@ public class ProfileService implements IProfileService {
                     .build();
             profileRepository.save(profile);
             log.info("Profile created");
-            return new ProfileResponseDto(profile.getId(),profile.getFriends(),
+            return new ProfileResponseDto(profile.getId(),profile.getTotalFriends(),
                     profile.getLikes(), profile.getDislikes(), profile.getProfilePictureURL());
         }
         catch (Exception e){
@@ -89,17 +90,37 @@ public class ProfileService implements IProfileService {
         }
     }
 
-    public Boolean addFriend(String fromId, String toId) throws Exception{
+    public Boolean sendFriendRequest(String fromId, String toId) throws Exception{
         try{
             Optional<Profile> fromProfile = profileRepository.findById(fromId);
             Optional<Profile> toProfile = profileRepository.findById(toId);
             if (fromProfile.isEmpty() || toProfile.isEmpty()){
-                log.error("method : addFriend(String fromId, String toId), message : no profile found");
+                log.error("method : sendFriendRequest(String fromId, String toId), message : no profile found");
                 throw new Exception("No profile found");
             }
             log.info("profile fetched");
-            fromProfile.get().addFriends(toId);
-            toProfile.get().addFriends(fromId);
+            fromProfile.get().addSentRequest(toId);
+            toProfile.get().addReceivedRequest(fromId);
+            return true;
+        }
+        catch (Exception e){
+            throw new Exception();
+        }
+    }
+
+    public Boolean acceptFriendRequest(String fromId, String toId) throws Exception{
+        try{
+            Optional<Profile> fromProfile = profileRepository.findById(fromId);
+            Optional<Profile> toProfile = profileRepository.findById(toId);
+            if (fromProfile.isEmpty() || toProfile.isEmpty()){
+                log.error("method : acceptFriendRequest(String fromId, String toId), message : no profile found");
+                throw new Exception("No profile found");
+            }
+            log.info("profile fetched");
+            fromProfile.get().addFriend(toId);
+            toProfile.get().addFriend(fromId);
+            fromProfile.get().removeSentRequest(toId);
+            toProfile.get().removeReceivedRequest(fromId);
             return true;
         }
         catch (Exception e){

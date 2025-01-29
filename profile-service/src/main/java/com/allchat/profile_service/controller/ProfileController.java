@@ -40,10 +40,17 @@ public class ProfileController {
         return new ResponseEntity<>(false, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-    @PostMapping("/friend-request/{fromId}/{toId}")
-    public ResponseEntity<Boolean> addFriend(@PathVariable String fromId, @PathVariable String toId) throws Exception{
-        boolean friendAdded = profileService.addFriend(fromId, toId);
-        if(friendAdded) return new ResponseEntity<>(true, HttpStatus.ACCEPTED);
+    @PatchMapping("/send-friend-request/{fromId}/{toId}")
+    public ResponseEntity<Boolean> sendFriendRequest(@PathVariable String fromId, @PathVariable String toId) throws Exception{
+        boolean requestSent = profileService.sendFriendRequest(fromId, toId);
+        if(requestSent) return new ResponseEntity<>(true, HttpStatus.ACCEPTED);
+        return new ResponseEntity<>(false, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @PatchMapping("/accept-friend-request/{fromId}/{toId}")
+    public ResponseEntity<Boolean> acceptFriendRequest(@PathVariable String fromId, @PathVariable String toId) throws Exception{
+        boolean requestAccepted = profileService.acceptFriendRequest(fromId, toId);
+        if(requestAccepted) return new ResponseEntity<>(true, HttpStatus.ACCEPTED);
         return new ResponseEntity<>(false, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }

@@ -12,5 +12,7 @@ public interface IProfileService {
 
     Boolean addDislike(String profileId) throws Exception;
 
-    Boolean addFriend(String fromId, String toId) throws Exception;
+    Boolean sendFriendRequest(String fromId, String toId) throws Exception;
+
+    Boolean acceptFriendRequest(String fromId, String toId) throws Exception;
 }
