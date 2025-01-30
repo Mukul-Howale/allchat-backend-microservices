@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import java.math.BigInteger;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.net.http.HttpRequest;
 import java.util.Optional;
 
@@ -44,8 +45,17 @@ public class ProfileService implements IProfileService {
                     .build();
             profileRepository.save(profile);
             log.info("Profile created");
-            return new ProfileResponseDto(profile.getId(),profile.getTotalFriends(),
-                    profile.getLikes(), profile.getDislikes(), profile.getProfilePictureURL());
+            return ProfileResponseDto.builder()
+                    .id(profile.getId())
+                    .userId(userId)
+                    .username(profile.getUsername())
+                    .totalFriends(profile.getTotalFriends())
+                    .likes(profile.getLikes())
+                    .dislikes(profile.getDislikes())
+                    .paid(profile.isPaid())
+                    .profilePictureURL(profile.getProfilePictureURL())
+                    .friends(profile.getFriends())
+                    .build();
         }
         catch (Exception e){
             throw new Exception();
@@ -158,11 +168,15 @@ public class ProfileService implements IProfileService {
 
     public String getUsername() throws Exception { return  generateUsername(); }
 
-    private String generateUsername() throws URISyntaxException, JsonProcessingException {
-        HttpRequest request = HttpRequest.newBuilder(new URI("https://usernameapiv1.vercel.app/api/random-usernames")).build();
-        Optional<HttpRequest.BodyPublisher> bodyPublisher = request.bodyPublisher();
-        JsonNode jsonNode = objectMapper.readTree(bodyPublisher.get().toString());
-        return jsonNode.get("usernames").asText();
+    private String generateUsername() throws Exception {
+        JsonNode jsonNode = objectMapper.readTree(new URI("https://usernameapiv1.vercel.app/api/random-usernames").toURL()).path("usernames");
+        StringBuilder username = new StringBuilder();
+        if(jsonNode.isArray()){
+            for(JsonNode node : jsonNode){
+                username.append(node.asText());
+            }
+        }
+        return username.toString();
     }
 
     // Block user
