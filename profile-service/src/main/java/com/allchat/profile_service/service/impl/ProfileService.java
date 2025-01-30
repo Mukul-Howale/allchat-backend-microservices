@@ -190,6 +190,5 @@ public class ProfileService implements IProfileService {
     // Get user's friends
     // Get user's likes
     // Get user's dislikes
-    // Add like
-    // Add dislike
+
 }
