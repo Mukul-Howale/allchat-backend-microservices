@@ -1,6 +1,9 @@
 package com.allchat.profile_service.service;
 
 import com.allchat.profile_service.dto.ProfileResponseDto;
+import com.allchat.profile_service.model.Profile;
+
+import java.util.List;
 
 public interface IProfileService {
 
@@ -17,6 +20,8 @@ public interface IProfileService {
     Boolean acceptFriendRequest(String fromId, String toId) throws Exception;
 
     Boolean removeFriend(String profileId, String friendId) throws Exception;
+
+    List<String> getFriendsId(String profileId, Integer offset, Integer limit) throws Exception;
 
     String getUsername() throws Exception;
 }

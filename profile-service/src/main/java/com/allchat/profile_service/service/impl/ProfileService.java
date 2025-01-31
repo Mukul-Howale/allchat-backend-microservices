@@ -19,6 +19,8 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.http.HttpRequest;
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -160,6 +162,22 @@ public class ProfileService implements IProfileService {
             optionalProfile.get().removeFriend(friendId);
             optionalFriend.get().removeFriend(profileId);
             return true;
+        }
+        catch (Exception e){
+            throw new Exception();
+        }
+    }
+
+    public List<String> getFriendsId(String profileId, Integer offset, Integer limit) throws Exception{
+        try {
+            Optional<String> friends = profileRepository.getFriendsId(profileId,offset,limit);
+            if (friends.isEmpty()) {
+                log.error("method : getFriends(String profileId, Integer offset, Integer limit)," +
+                        "message : no profile found");
+                throw new Exception("No profile ids found");
+            }
+            log.info("profile ids fetched");
+            return Collections.singletonList(friends.get());
         }
         catch (Exception e){
             throw new Exception();

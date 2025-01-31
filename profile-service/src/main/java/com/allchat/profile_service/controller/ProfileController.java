@@ -9,6 +9,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/profile")
 @RequiredArgsConstructor
@@ -43,14 +47,14 @@ public class ProfileController {
     @PatchMapping("/send-friend-request/{fromId}/{toId}")
     public ResponseEntity<Boolean> sendFriendRequest(@PathVariable String fromId, @PathVariable String toId) throws Exception{
         boolean requestSent = profileService.sendFriendRequest(fromId, toId);
-        if(requestSent) return new ResponseEntity<>(true, HttpStatus.ACCEPTED);
+        if(requestSent) return new ResponseEntity<>(true, HttpStatus.OK);
         return new ResponseEntity<>(false, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     @PatchMapping("/accept-friend-request/{fromId}/{toId}")
     public ResponseEntity<Boolean> acceptFriendRequest(@PathVariable String fromId, @PathVariable String toId) throws Exception{
         boolean requestAccepted = profileService.acceptFriendRequest(fromId, toId);
-        if(requestAccepted) return new ResponseEntity<>(true, HttpStatus.ACCEPTED);
+        if(requestAccepted) return new ResponseEntity<>(true, HttpStatus.OK);
         return new ResponseEntity<>(false, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
@@ -61,8 +65,16 @@ public class ProfileController {
         return new ResponseEntity<>(false, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
+    @GetMapping("/get-friends/{profileId}")
+    public ResponseEntity<List<String>> getFriendsId(@PathVariable String profileId,
+                                                   @RequestParam Integer offset,
+                                                   @RequestParam Integer limit) throws Exception{
+        List<String> profileIds = profileService.getFriendsId(profileId,offset,limit);
+        return new ResponseEntity<>(profileIds, HttpStatus.OK);
+    }
+
     @GetMapping("/username")
     public ResponseEntity<String> getUserName() throws Exception{
-        return new ResponseEntity<>(profileService.getUsername(), HttpStatus.ACCEPTED);
+        return new ResponseEntity<>(profileService.getUsername(), HttpStatus.OK);
     }
 }
