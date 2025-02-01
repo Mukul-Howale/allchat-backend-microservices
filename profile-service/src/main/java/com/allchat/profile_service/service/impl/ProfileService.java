@@ -1,8 +1,11 @@
 package com.allchat.profile_service.service.impl;
 
 import com.allchat.profile_service.dto.ProfileResponseDto;
+import com.allchat.profile_service.dto.ReportDto;
 import com.allchat.profile_service.exception.NoSuchProfileException;
 import com.allchat.profile_service.model.Profile;
+import com.allchat.profile_service.model.Report;
+import com.allchat.profile_service.repository.ReportRepository;
 import com.allchat.profile_service.service.IProfileService;
 import com.allchat.profile_service.repository.ProfileRepository;
 import com.fasterxml.jackson.core.JsonParser;
@@ -29,6 +32,7 @@ import java.util.Optional;
 public class ProfileService implements IProfileService {
 
     private final ProfileRepository profileRepository;
+    private final ReportRepository reportRepository;
 
     private final ModelMapper modelMapper;
 
@@ -180,6 +184,19 @@ public class ProfileService implements IProfileService {
             return Collections.singletonList(friends.get());
         }
         catch (Exception e){
+            throw new Exception();
+        }
+    }
+
+    public Boolean report(ReportDto reportDto) throws Exception{
+        try{
+            Report report = new Report();
+            modelMapper.map(report, reportDto);
+            reportRepository.save(report);
+            return true;
+        }
+        catch (Exception e){
+            log.error(e.toString());
             throw new Exception();
         }
     }

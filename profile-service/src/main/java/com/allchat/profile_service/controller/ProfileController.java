@@ -1,6 +1,7 @@
 package com.allchat.profile_service.controller;
 
 import com.allchat.profile_service.dto.ProfileResponseDto;
+import com.allchat.profile_service.dto.ReportDto;
 import com.allchat.profile_service.service.IProfileService;
 import jakarta.validation.constraints.Null;
 import jakarta.ws.rs.Path;
@@ -71,6 +72,13 @@ public class ProfileController {
                                                    @RequestParam Integer limit) throws Exception{
         List<String> profileIds = profileService.getFriendsId(profileId,offset,limit);
         return new ResponseEntity<>(profileIds, HttpStatus.OK);
+    }
+
+    @PostMapping("/report")
+    public ResponseEntity<Boolean> report(@RequestBody ReportDto reportDto) throws Exception{
+        boolean reported = profileService.report(reportDto);
+        if(reported) return new ResponseEntity<>(true, HttpStatus.ACCEPTED);
+        return new ResponseEntity<>(false, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     @GetMapping("/username")
