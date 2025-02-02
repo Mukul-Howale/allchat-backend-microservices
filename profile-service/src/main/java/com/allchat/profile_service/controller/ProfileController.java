@@ -81,6 +81,13 @@ public class ProfileController {
         return new ResponseEntity<>(false, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
+    @DeleteMapping("/delete-profile/{profileId}")
+    public ResponseEntity<Boolean> deleteProfile(@PathVariable String profileId) throws Exception{
+        boolean deleted = profileService.deleteProfile(profileId);
+        if(deleted) return new ResponseEntity<>(true, HttpStatus.ACCEPTED);
+        return new ResponseEntity<>(false, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
     @GetMapping("/username")
     public ResponseEntity<String> getUserName() throws Exception{
         return new ResponseEntity<>(profileService.getUsername(), HttpStatus.OK);

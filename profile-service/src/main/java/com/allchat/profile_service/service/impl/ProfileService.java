@@ -201,6 +201,23 @@ public class ProfileService implements IProfileService {
         }
     }
 
+    public Boolean deleteProfile(String profileId) throws Exception{
+        try {
+            Optional<Profile> profile = profileRepository.findById(profileId);
+            if (profile.isEmpty()) {
+                log.error("method : deleteProfile(String profileId)," + "message : no profile found");
+                throw new Exception("No profile ids found");
+            }
+            log.info("profile ids fetched");
+            profileRepository.deleteById(profileId);
+            log.info("profile deleted");
+            return true;
+        }
+        catch (Exception e){
+            throw new Exception();
+        }
+    }
+
     public String getUsername() throws Exception { return  generateUsername(); }
 
     private String generateUsername() throws Exception {

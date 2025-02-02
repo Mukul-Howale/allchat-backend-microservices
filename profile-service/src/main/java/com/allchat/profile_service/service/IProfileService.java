@@ -26,5 +26,7 @@ public interface IProfileService {
 
     Boolean report(ReportDto reportDto) throws Exception;
 
+    Boolean deleteProfile(String profileId) throws Exception;
+
     String getUsername() throws Exception;
 }
