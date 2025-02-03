@@ -38,8 +38,18 @@ public class ProfileService implements IProfileService {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
+    /**
+     *
+     * @param userId
+     * @return
+     * @throws Exception
+     *
+     * TO:DO
+     * checking if the userId exists
+     */
     public ProfileResponseDto createProfile(String userId) throws Exception {
         try{
+
             Profile profile = Profile.builder()
                     .totalFriends(new BigInteger("0"))
                     .username(generateUsername())
@@ -51,17 +61,7 @@ public class ProfileService implements IProfileService {
                     .build();
             profileRepository.save(profile);
             log.info("Profile created");
-            return ProfileResponseDto.builder()
-                    .id(profile.getId())
-                    .userId(userId)
-                    .username(profile.getUsername())
-                    .totalFriends(profile.getTotalFriends())
-                    .likes(profile.getLikes())
-                    .dislikes(profile.getDislikes())
-                    .paid(profile.isPaid())
-                    .profilePictureURL(profile.getProfilePictureURL())
-                    .friends(profile.getFriends())
-                    .build();
+            return modelMapper.map(profile,ProfileResponseDto.class);
         }
         catch (Exception e){
             throw new Exception();
@@ -172,9 +172,9 @@ public class ProfileService implements IProfileService {
         }
     }
 
-    public List<String> getFriendsId(String profileId, Integer offset, Integer limit) throws Exception{
+    public List<String> getFriendIds(String profileId, Integer offset, Integer limit) throws Exception{
         try {
-            Optional<String> friends = profileRepository.getFriendsId(profileId,offset,limit);
+            Optional<String> friends = profileRepository.getFriendIds(profileId,offset,limit);
             if (friends.isEmpty()) {
                 log.error("method : getFriends(String profileId, Integer offset, Integer limit)," +
                         "message : no profile found");
@@ -190,9 +190,9 @@ public class ProfileService implements IProfileService {
 
     public Boolean report(ReportDto reportDto) throws Exception{
         try{
-            Report report = new Report();
-            modelMapper.map(report, reportDto);
+            Report report = modelMapper.map(reportDto, Report.class);
             reportRepository.save(report);
+            log.info("report saved");
             return true;
         }
         catch (Exception e){
@@ -231,13 +231,7 @@ public class ProfileService implements IProfileService {
         return username.toString();
     }
 
-    // Block user
-    // Report user
-    // Unblock user 
-    // Get user's profile
-    // Get all profiles
     // Update profile
-    // Delete profile
     // Get all users
     // Get user's friends
     // Get user's likes

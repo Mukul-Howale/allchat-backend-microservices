@@ -67,10 +67,10 @@ public class ProfileController {
     }
 
     @GetMapping("/get-friends/{profileId}")
-    public ResponseEntity<List<String>> getFriendsId(@PathVariable String profileId,
+    public ResponseEntity<List<String>> getFriendIds(@PathVariable String profileId,
                                                    @RequestParam Integer offset,
                                                    @RequestParam Integer limit) throws Exception{
-        List<String> profileIds = profileService.getFriendsId(profileId,offset,limit);
+        List<String> profileIds = profileService.getFriendIds(profileId,offset,limit);
         return new ResponseEntity<>(profileIds, HttpStatus.OK);
     }
 
@@ -88,6 +88,7 @@ public class ProfileController {
         return new ResponseEntity<>(false, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
+    @Deprecated
     @GetMapping("/username")
     public ResponseEntity<String> getUserName() throws Exception{
         return new ResponseEntity<>(profileService.getUsername(), HttpStatus.OK);

@@ -22,7 +22,7 @@ public interface IProfileService {
 
     Boolean removeFriend(String profileId, String friendId) throws Exception;
 
-    List<String> getFriendsId(String profileId, Integer offset, Integer limit) throws Exception;
+    List<String> getFriendIds(String profileId, Integer offset, Integer limit) throws Exception;
 
     Boolean report(ReportDto reportDto) throws Exception;
 

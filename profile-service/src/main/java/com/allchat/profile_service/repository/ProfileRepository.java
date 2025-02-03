@@ -9,5 +9,5 @@ import java.util.Optional;
 public interface ProfileRepository extends MongoRepository<Profile, String> {
 
     @Query(value = "{ 'profileId': ?0 }", fields = "{ 'friends': { $slice: [?1, ?2] }, '_id': 0 }")
-    Optional<String> getFriendsId(String profileId, Integer offset, Integer limit);
+    Optional<String> getFriendIds(String profileId, Integer offset, Integer limit);
 }
