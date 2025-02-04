@@ -230,11 +230,4 @@ public class ProfileService implements IProfileService {
         }
         return username.toString();
     }
-
-    // Update profile
-    // Get all users
-    // Get user's friends
-    // Get user's likes
-    // Get user's dislikes
-
 }
