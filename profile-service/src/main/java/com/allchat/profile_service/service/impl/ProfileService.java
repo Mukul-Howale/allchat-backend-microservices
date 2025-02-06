@@ -92,6 +92,7 @@ public class ProfileService implements IProfileService {
             log.info("profile fetched");
             optionalProfile.get().setLikes(optionalProfile.get().getLikes().add(BigInteger.ONE));
             profileRepository.save(optionalProfile.get());
+            log.info("like added");
             return true;
         }
         catch (Exception e){
@@ -109,6 +110,7 @@ public class ProfileService implements IProfileService {
             log.info("profile fetched");
             optionalProfile.get().setDislikes(optionalProfile.get().getDislikes().add(BigInteger.ONE));
             profileRepository.save(optionalProfile.get());
+            log.info("disliked added");
             return true;
         }
         catch (Exception e){
@@ -127,6 +129,7 @@ public class ProfileService implements IProfileService {
             log.info("profile fetched");
             fromProfile.get().addSentRequest(toId);
             toProfile.get().addReceivedRequest(fromId);
+            log.info("request sent");
             return true;
         }
         catch (Exception e){
@@ -147,6 +150,7 @@ public class ProfileService implements IProfileService {
             toProfile.get().addFriend(fromId);
             fromProfile.get().removeSentRequest(toId);
             toProfile.get().removeReceivedRequest(fromId);
+            log.info("friendship started");
             return true;
         }
         catch (Exception e){
@@ -165,6 +169,7 @@ public class ProfileService implements IProfileService {
             log.info("profile fetched");
             optionalProfile.get().removeFriend(friendId);
             optionalFriend.get().removeFriend(profileId);
+            log.info("friendship over!!");
             return true;
         }
         catch (Exception e){
